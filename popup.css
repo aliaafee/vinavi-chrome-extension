@@ -1,0 +1,239 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 600px;
+    height: 500px;
+    /* display: grid;
+    grid-template-rows: 50px calc(100% - 50px); */
+}
+
+#header {
+    display: grid;
+}
+
+#content {
+    display: flex;
+    /* height: calc(500px - 24px); */
+    height: 100%;
+}
+
+#list {
+    width: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: lightgray;
+}
+
+#detail {
+    width: calc(100% - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#list>ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#list>ul>li:nth-child(odd) {
+    background-color: silver;
+}
+
+#list>ul>li:nth-child(even) {
+    background-color: lightgray;
+}
+
+#list>ul>li>div:first-child {
+    display: none;
+}
+
+#list>ul>li>div>ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#list>ul>li>div>ul>li,
+#list>ul>li.load-more,
+#list>ul>li.failed-load {
+    padding: 2px;
+    cursor: pointer;
+}
+
+#list>ul>li.failed-load {
+    color: red;
+}
+
+#list>ul>li>div>ul>li:hover,
+#list>ul>li.load-more:hover {
+    background-color: grey;
+}
+
+#list>ul>li>div>ul>li.selected {
+    background-color: #f38181;
+}
+
+#list>ul>li>div>ul>li>span {
+    display: block;
+}
+
+#list>ul>li>div>ul>li>span:nth-child(1) {
+    display: none;
+}
+
+#list>ul>li>div>ul>li>span:nth-child(2) {
+    font-size: small;
+}
+
+#list>ul>li>div>ul>li>span:nth-child(3) {
+    font-weight: bold;
+}
+
+#list>ul>li>div>ul>li>span:nth-child(3)::before {
+    content: "Dr. ";
+}
+
+#detail {
+    padding: 5px;
+}
+
+#detail > div > h2 {
+    margin: 10px 0 5px 0;
+    font-size: medium;
+}
+
+#detail > div > h2 > a {
+    font-weight: normal;
+    font-size: small;
+    text-decoration: none;
+}
+
+#detail > div > h2 > a:hover {
+    text-decoration: underline;
+}
+
+#detail > div > h2 > a::before {
+    content: "[";
+    text-decoration: none;
+    color: black;
+}
+
+#detail > div > h2 > a::after {
+    content: "]";
+    text-decoration: none;
+    color: black;
+}
+
+ul.episode-info {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-gap: 5px;
+}
+
+ul.episode-info li {
+    padding: 0px;
+}
+
+ul.episode-info li:nth-child(3) {
+    grid-column: 1/3;
+}
+
+ul.episode-info li > span {
+    display: block
+}
+
+ul.episode-info li > span:first-child {
+    font-size: smaller;
+    font-variant: small-caps;
+}
+
+ul.episode-info li > span:nth-child(2) {
+    font-weight: bold;
+}
+
+ul.notes-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-gap: 10px;
+}
+
+ul.notes-list > li {
+    background-color: lightgray;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+ul.notes-list > li > span {
+    display: block;
+}
+
+ul.notes-list > li > span:first-child {
+    font-size: smaller;
+    font-variant: small-caps;
+}
+
+ul.notes-list > li > span:nth-child(2) {
+    white-space: pre-wrao;
+}
+
+ul.diagnosis-list {
+    list-style: none;
+    padding: 0px;
+}
+
+ul.diagnosis-list > li {
+    display: grid;
+    grid-template-columns: 50px calc(100% - 50px);
+    grid-gap: 0px;
+    margin-bottom: 5px;
+}
+
+ul.diagnosis-list > li > span {
+}
+
+ul.diagnosis-list > li > span:nth-child(1) {
+    font-weight: bold;
+}
+
+ul.diagnosis-list > li > span:nth-child(3) {
+    grid-column: 2/3;
+    font-style: italic;
+}
+
+ul.prescription-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-gap: 10px;
+}
+
+ul.prescription-list > li {
+    background-color: lightgray;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+ul.prescription-list > li > div > span:nth-child(1) {
+    font-size: smaller;
+    font-variant: small-caps;
+}
+
+ul.prescription-list > li > div > span:nth-child(2) {
+    font-weight: bold;
+}
+
+ul.prescription-list > li > ol {
+    padding-left: 20px;
+}
+
+ul.prescription-list > li > ol > li > span.medicine-name {
+    font-weight: bold;
+}
