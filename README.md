@@ -9,5 +9,5 @@
 
 * Go to Extension page on chrome [chrome://extensions/](chrome://extensions/)
 * Enable developer mode, by turning on the toggle on the upper right corner
-* Download the release zip file
+* Download the release zip file [vinavi-chrome-extension-0.1.zip](https://github.com/aliaafee/vinavi-chrome-extension/releases/download/0.1/vinavi-chrome-extension-0.1.zip)
 * Drag and drop the zip file to the Extensions page.
