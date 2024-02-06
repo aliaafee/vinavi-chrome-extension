@@ -188,8 +188,8 @@ async function createEpisodeDetailElement(episodeDetail) {
     const patientId = episodeDetail.data.relationships.patient.data.id;
 
     const episodeHeading = document.createElement("h2");
-    episodeHeading.innerHTML = `Episode ` +
-        `<a target="_blank" href="https://vinavi.aasandha.mv/#/patients/${patientId}/episodes/${episodeId}">open &#11194;</a>`;
+    episodeHeading.innerHTML = `<span>Episode</span>` +
+        `<a title="Open episode" target="_blank" href="https://vinavi.aasandha.mv/#/patients/${patientId}/episodes/${episodeId}"></a>`;
 
     const episodeInfo = document.createElement("ul");
     episodeInfo.className = 'episode-info';

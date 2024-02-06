@@ -102,9 +102,29 @@ body {
 #detail > div > h2 {
     margin: 10px 0 5px 0;
     font-size: medium;
+    vertical-align: bottom;
+    display: flex;
 }
 
 #detail > div > h2 > a {
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+    mask: url("images/external-link.svg") no-repeat center;
+    background-color: #0000FF;
+    margin-left: 10px;
+    border-radius: 50%;
+}
+
+#detail > div > h2 > a:visited {
+    background-color: #800080;
+}
+
+#detail > div > h2 > a:active {
+    background-color: #FF0000;
+}
+
+/* #detail > div > h2 > a {
     font-weight: normal;
     font-size: small;
     text-decoration: none;
@@ -112,9 +132,9 @@ body {
 
 #detail > div > h2 > a:hover {
     text-decoration: underline;
-}
+} */
 
-#detail > div > h2 > a::before {
+/* #detail > div > h2 > a::before {
     content: "[";
     text-decoration: none;
     color: black;
@@ -124,7 +144,7 @@ body {
     content: "]";
     text-decoration: none;
     color: black;
-}
+} */
 
 ul.episode-info {
     list-style: none;
