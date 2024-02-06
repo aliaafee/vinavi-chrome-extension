@@ -13,14 +13,6 @@ chrome.runtime.onMessage.addListener(
             return true;
         }
 
-        // if (request.action === "getEpisodes") {
-        //     (async () => {
-        //         const episodes = await getEpisodes(request.caseId);
-        //         sendResponse(episodes);
-        //     }) ();
-        //     return true;
-        // }
-
         if (request.action === "getEpisodeDetail") {
             (async () => {
                 const episodeDetail = await getEpisodeDetail(request.episodeId);
@@ -45,8 +37,6 @@ async function getPatientId() {
 }
 
 function generateCasesUrl(patientId, page) {
-    // return `https://vinavi.aasandha.mv/api/patients/${patientId}/patient-cases?include=last-episode,doctor&page%5Bnumber%5D=${page}&sort=-created_at`
-    // return `https://vinavi.aasandha.mv/api/patients/${patientId}/patient-cases?include=last-episode,doctor&page%5Bnumber%5D=${page}&sort=-created_at&page%5Bsize%5D=2`
     return `https://vinavi.aasandha.mv/api/patients/${patientId}/patient-cases?include=episodes,doctor&page%5Bnumber%5D=${page}&sort=-created_at`
 }
 
@@ -65,21 +55,6 @@ async function getCases(patientId, page) {
     }
 
 }
-
-// function generateEpisodesUrl(caseId) {
-//     return `https://vinavi.aasandha.mv/api/patient-cases/${caseId}/episodes?include=doctor,referral`
-// }
-
-// async function getEpisodes(caseId) {
-//     const episodesUrl = generateEpisodesUrl(caseId);
-
-//     const response = await fetch(episodesUrl);
-//     if (!response.ok) {
-//         return null
-//     }
-
-//     return await response.json();
-// }
 
 function generateEpisodeDetailUrl(episodeId) {
     return `https://vinavi.aasandha.mv/api/episodes/${episodeId}?include=patient,doctor,prescriptions.medicines.preferred-medicine,prescriptions.consumables.preferred-consumable,prescriptions.professional,requested-services.service.service-professions,requested-services.professional,requested-services.documents,diagnoses.icd-code,vitals,vitals.professional,admission,requested-admission,eev-referrals,current-eev-referral,notes.professional,diagnoses.professional`

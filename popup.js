@@ -22,18 +22,6 @@ async function getCases(page) {
     );
 }
 
-// async function getEpisodes(caseId) {
-//     const activeTab = await getActiveTab();
-
-//     return await chrome.tabs.sendMessage(
-//         activeTab.id,
-//         {
-//             "action": "getEpisodes",
-//             "caseId": caseId
-//         }
-//     );
-// }
-
 async function getEpisodeDetail(episodeId) {
     const activeTab = await getActiveTab();
 
@@ -63,6 +51,25 @@ async function onPopupLoaded() {
 
     listElement.innerHTML = "";
     listElement.appendChild(casesElement);
+
+    listElement.onscroll = () => {
+        const moreButton = document.getElementById("more-button");
+
+        if (moreButton == null) {
+            return;
+        }
+
+        var rect = moreButton.getBoundingClientRect();
+        
+        const windowHeight = (window.innerHeight || document.documentElement.clientHeight);
+
+        const vertInView = (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
+
+        if (vertInView) {
+            moreButton.click();
+        }
+
+    }
 }
 
 async function createCaseItems(cases, addMoreListElements) {
@@ -131,6 +138,7 @@ async function createCaseItems(cases, addMoreListElements) {
             }
             addMoreListElements((await createCaseItems(moreCases, addMoreListElements)))
         }
+        moreButton.setAttribute("id", "more-button");
 
         return caseElements.concat([moreButton])
     }
@@ -146,36 +154,6 @@ async function createCasesElement(cases) {
 
     return casesElement
 }
-
-// async function createEpisodesElement(episodes) {
-//     const includedMap = createIncludedMap(episodes);
-
-//     const episodesElement = document.createElement("ul");
-
-//     episodesElement.appendChild(...episodes.data.map((episode) => {
-//         const doctor = includedMap.professionals[episode.relationships.doctor.data.id]['attributes'];
-
-//         const episodeElement = document.createElement("li");
-//         episodeElement.innerHTML = `<span>episode</span><span>${episode.attributes.created_at}</span><span>${doctor.fullname}</span>`
-
-//         episodeElement.onclick = async () => {
-//             const detailElement = document.getElementById("detail");
-
-//             detailElement.innerHTML = "Loading..."
-
-//             const episodeDetail = await getEpisodeDetail(episode.id);
-//             const episodeDetailElement = await createEpisodeDetailElement(episodeDetail);
-
-//             detailElement.innerHTML = "";
-//             detailElement.appendChild(episodeDetailElement);
-//         }
-
-//         return episodeElement;
-//     }));
-
-//     return episodesElement;
-// }
-
 
 async function createEpisodeDetailElement(episodeDetail) {
     const includedMap = createIncludedMap(episodeDetail);

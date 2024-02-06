@@ -4,8 +4,6 @@ body {
     overflow: hidden;
     width: 600px;
     height: 500px;
-    /* display: grid;
-    grid-template-rows: 50px calc(100% - 50px); */
 }
 
 #header {
@@ -14,7 +12,6 @@ body {
 
 #content {
     display: flex;
-    /* height: calc(500px - 24px); */
     height: 100%;
 }
 
@@ -123,28 +120,6 @@ body {
 #detail > div > h2 > a:active {
     background-color: #FF0000;
 }
-
-/* #detail > div > h2 > a {
-    font-weight: normal;
-    font-size: small;
-    text-decoration: none;
-}
-
-#detail > div > h2 > a:hover {
-    text-decoration: underline;
-} */
-
-/* #detail > div > h2 > a::before {
-    content: "[";
-    text-decoration: none;
-    color: black;
-}
-
-#detail > div > h2 > a::after {
-    content: "]";
-    text-decoration: none;
-    color: black;
-} */
 
 ul.episode-info {
     list-style: none;
