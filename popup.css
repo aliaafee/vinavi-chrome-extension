@@ -28,6 +28,13 @@ body {
     overflow-x: hidden;
 }
 
+#logo {
+    background: url("images/icon.svg") no-repeat center;
+    opacity: 0.2;
+    width: 100%;
+    height: 100%;
+}
+
 #list>ul {
     margin: 0;
     padding: 0;
