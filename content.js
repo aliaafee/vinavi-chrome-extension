@@ -20,6 +20,19 @@ chrome.runtime.onMessage.addListener(
             })();
             return true;
         }
+
+        if (request.action === "getPatient") {
+            (async () => {
+                const patientId = await getPatientId()
+                if (patientId === null) {
+                    sendResponse(null);
+                    return true;
+                }
+                const patient = await getPatient(patientId);
+                sendResponse(patient);
+            })();
+            return true;
+        }
     }
 );
 
@@ -36,41 +49,34 @@ async function getPatientId() {
     return null;
 }
 
-function generateCasesUrl(patientId, page) {
-    return `https://vinavi.aasandha.mv/api/patients/${patientId}/patient-cases?include=episodes,doctor&page%5Bnumber%5D=${page}&sort=-created_at`
+async function getResource(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            return null
+        }
+
+        return await response.json();
+    } catch (error) {
+        return null
+    }
 }
 
 async function getCases(patientId, page) {
-    try {
-        const casesUrl = generateCasesUrl(patientId, page);
-
-        const response = await fetch(casesUrl);
-        if (!response.ok) {
-            return null
-        }
-
-        return await response.json();
-    } catch (error) {
-        return null
-    }
-
-}
-
-function generateEpisodeDetailUrl(episodeId) {
-    return `https://vinavi.aasandha.mv/api/episodes/${episodeId}?include=patient,doctor,prescriptions.medicines.preferred-medicine,prescriptions.consumables.preferred-consumable,prescriptions.professional,requested-services.service.service-professions,requested-services.professional,requested-services.documents,diagnoses.icd-code,vitals,vitals.professional,admission,requested-admission,eev-referrals,current-eev-referral,notes.professional,diagnoses.professional`
+    return await getResource(
+        `https://vinavi.aasandha.mv/api/patients/${patientId}/patient-cases?include=episodes,doctor&page%5Bnumber%5D=${page}&sort=-created_at`
+    )
 }
 
 async function getEpisodeDetail(episodeId) {
-    try {
-        const episodeUrl = generateEpisodeDetailUrl(episodeId);
-
-        const response = await fetch(episodeUrl);
-        if (!response.ok) {
-            return null
-        }
-
-        return await response.json();
-    } catch (error) {
-        return null
-    }
+    return await getResource(
+        `https://vinavi.aasandha.mv/api/episodes/${episodeId}?include=patient,doctor,prescriptions.medicines.preferred-medicine,prescriptions.consumables.preferred-consumable,prescriptions.professional,requested-services.service.service-professions,requested-services.professional,requested-services.documents,diagnoses.icd-code,vitals,vitals.professional,admission,requested-admission,eev-referrals,current-eev-referral,notes.professional,diagnoses.professional`
+    )
 }
+
+async function getPatient(patientId) {
+    return await getResource(
+        `https://vinavi.aasandha.mv/api/patients/${patientId}?include=current-admission,current-eev-referral,admission-request,address.island.atoll,blocked-patient`
+    )
+}
+

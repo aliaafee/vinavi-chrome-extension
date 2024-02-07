@@ -34,6 +34,17 @@ async function getEpisodeDetail(episodeId) {
     );
 }
 
+async function getPatient(patientId) {
+    const activeTab = await getActiveTab();
+
+    return await chrome.tabs.sendMessage(
+        activeTab.id,
+        {
+            "action": "getPatient"
+        }
+    );
+}
+
 async function onPopupLoaded() {
     const listElement = document.getElementById("list");
     listElement.innerHTML = `<div id="loading">Loading...</div>`;
