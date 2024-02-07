@@ -13,44 +13,65 @@ async function getActiveTab() {
 async function getCases(page) {
     const activeTab = await getActiveTab();
 
-    return await chrome.tabs.sendMessage(
-        activeTab.id,
-        {
-            "action": "getCases",
-            "page": page
-        }
-    );
+    try {
+        return await chrome.tabs.sendMessage(
+            activeTab.id,
+            {
+                "action": "getCases",
+                "page": page
+            }
+        );
+    } catch(error) {
+        return null
+    }
 }
 
 async function getEpisodeDetail(episodeId) {
     const activeTab = await getActiveTab();
 
-    return await chrome.tabs.sendMessage(
-        activeTab.id,
-        {
-            "action": "getEpisodeDetail",
-            "episodeId": episodeId
-        }
-    );
+    try {
+        return await chrome.tabs.sendMessage(
+            activeTab.id,
+            {
+                "action": "getEpisodeDetail",
+                "episodeId": episodeId
+            }
+        );
+    } catch(error) {
+        return null
+    }
 }
 
-async function getPatient(patientId) {
+async function getPatient() {
     const activeTab = await getActiveTab();
-
-    return await chrome.tabs.sendMessage(
-        activeTab.id,
-        {
-            "action": "getPatient"
-        }
-    );
+    try {
+        return await chrome.tabs.sendMessage(
+            activeTab.id,
+            {
+                "action": "getPatient"
+            }
+        );
+    } catch(error) {
+        return null
+    }
 }
 
 async function onPopupLoaded() {
     const listElement = document.getElementById("list");
     listElement.innerHTML = `<div id="loading">Loading...</div>`;
 
-    const cases = await getCases(1);
+    const patient = await getPatient();
+    console.log(patient);
 
+    if (patient === null) {
+        const contentElement = document.getElementById("content");
+        contentElement.innerHTML = `<div id="error">Not found</div>`;
+        return
+    }
+
+    showPatientInfo(patient)
+
+    const cases = await getCases(1);
     console.log(cases);
 
     if (cases === null) {
@@ -81,6 +102,25 @@ async function onPopupLoaded() {
         }
 
     }
+}
+
+function getAge(dateOfBirth) {
+    const diff_ms = Date.now() - dateOfBirth;
+    const age_dt = new Date(diff_ms);
+    const years = diff_ms / 1000 / 3600 / 24 / 365;
+    const months = years % 1 * 12;
+    if (years < 1) {
+        return `${Math.floor(months)} months`;
+    }
+    return `${Math.floor(years)} years ${Math.floor(months)} months`;
+}
+
+function showPatientInfo(patient) {
+    document.getElementById("patient-name").innerText = patient.data.attributes.patient_name;
+    document.getElementById("patient-age").innerText = getAge(Date.parse(patient.data.attributes.birth_date));
+    document.getElementById("patient-nid").innerText = patient.data.attributes.national_identification;
+    document.getElementById("patient-sex").innerText = patient.data.attributes.gender;
+    document.getElementById("patient-dob").innerText = patient.data.attributes.birth_date;
 }
 
 async function createCaseItems(cases, addMoreListElements) {

@@ -3,7 +3,7 @@ body {
     padding: 0;
     overflow: hidden;
     width: 600px;
-    height: 500px;
+    height: 600px;
 }
 
 #header {
@@ -11,8 +11,32 @@ body {
 }
 
 #content {
-    display: flex;
+    display: grid;
+    grid-template-columns: 200px calc(100% - 200px);
+    grid-template-rows: min-content;
     height: 100%;
+}
+
+#patient-info {
+    grid-column: 1/3;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 5px;
+    padding: 5px;
+    background-color: lightgray;
+}
+
+#patient-info>div {
+    
+}
+
+#patient-info>div:nth-child(1) {
+    grid-column: 1/3;
+    font-weight: bold;
+}
+
+#patient-info>div:nth-child(6) {
+    grid-column: 1/3;
 }
 
 #list {
@@ -23,7 +47,7 @@ body {
 }
 
 #detail {
-    width: calc(100% - 200px);
+    /* width: calc(100% - 200px); */
     overflow-y: auto;
     overflow-x: hidden;
 }
