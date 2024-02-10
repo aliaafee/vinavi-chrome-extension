@@ -14,14 +14,14 @@ async function getCases(page) {
     const activeTab = await getActiveTab();
 
     try {
-        return await chrome.tabs.sendMessage(
+        return processResource(await chrome.tabs.sendMessage(
             activeTab.id,
             {
                 "action": "getCases",
                 "page": page
             }
-        );
-    } catch(error) {
+        ));
+    } catch (error) {
         return null
     }
 }
@@ -30,14 +30,14 @@ async function getEpisodeDetail(episodeId) {
     const activeTab = await getActiveTab();
 
     try {
-        return await chrome.tabs.sendMessage(
+        return processResource(await chrome.tabs.sendMessage(
             activeTab.id,
             {
                 "action": "getEpisodeDetail",
                 "episodeId": episodeId
             }
-        );
-    } catch(error) {
+        ));
+    } catch (error) {
         return null
     }
 }
@@ -45,14 +45,114 @@ async function getEpisodeDetail(episodeId) {
 async function getPatient() {
     const activeTab = await getActiveTab();
     try {
-        return await chrome.tabs.sendMessage(
+        return processResource(await chrome.tabs.sendMessage(
             activeTab.id,
             {
                 "action": "getPatient"
             }
-        );
-    } catch(error) {
+        ));
+    } catch (error) {
         return null
+    }
+}
+
+function processRelationshipItem(relationshipItem, includedMap, depth) {
+    if (!(relationshipItem.type in includedMap)) {
+        return relationshipItem;
+    }
+    if (!(relationshipItem.id in includedMap[relationshipItem.type])) {
+        return relationshipItem;
+    }
+    const relationshipObject = includedMap[relationshipItem.type][relationshipItem.id];
+
+    if (!('relationships' in relationshipObject)) {
+        return relationshipObject
+    }
+
+    return {
+        ...Object.keys(relationshipObject).filter(key => key != 'relationships').reduce((accumulator, key) => {
+            return { ...accumulator, [key]: relationshipObject[key] }
+        }, {}),
+        relationships: processRelationships(relationshipObject.relationships, includedMap, depth + 1)
+    }
+}
+
+function processRelationships(relationships, includedMap, depth = 1) {
+    if (relationships === null) {
+        return relationships
+    }
+    if (depth > 3) {
+        return relationships
+    }
+
+    return Object.keys(relationships).reduce((accumulator, key) => {
+        return {
+            ...accumulator, [key]: ((relationship) => {
+                if (relationship === null) {
+                    return null
+                }
+                if (Array.isArray(relationship)) {
+                    return {
+                        data: relationship.map((relationshipItem) => {
+                            return processRelationshipItem(relationshipItem, includedMap, depth)
+                        })
+                    }
+                }
+                return {
+                    data: processRelationshipItem(relationship, includedMap, depth)
+                }
+            })(relationships[key].data)
+        }
+    }, {})
+
+}
+
+function processDataItem(dataItem, includedMap) {
+    return {
+        ...Object.keys(dataItem).filter((key) => { if (key !== 'relationships') { return key } }).reduce((accumulator, key) => {
+            return { ...accumulator, [key]: dataItem[key] }
+        }, {}),
+        relationships: processRelationships(dataItem.relationships, includedMap)
+    }
+}
+
+function processResourceData(data, includedMap) {
+    if (data === null) {
+        return null
+    }
+
+    if (Array.isArray(data)) {
+        return data.map(dataItem => {
+            return processDataItem(dataItem, includedMap)
+        })
+    }
+
+    return processDataItem(data, includedMap);
+}
+
+function createIncludedMap(item) {
+    var map = {};
+
+    item.included.forEach((itemIncluded) => {
+        if (!(itemIncluded.type in map)) {
+            map[itemIncluded.type] = {}
+        }
+        map[itemIncluded.type][itemIncluded.id] = itemIncluded;
+    })
+
+    return map;
+}
+
+function processResource(resource) {
+    if (resource === null) {
+        return null
+    }
+
+    const includedMap = createIncludedMap(resource);
+
+    return {
+        meta: resource.meta,
+        data: processResourceData(resource.data, includedMap)
     }
 }
 
@@ -61,7 +161,6 @@ async function onPopupLoaded() {
     listElement.innerHTML = `<div id="loading">Loading...</div>`;
 
     const patient = await getPatient();
-    console.log(patient);
 
     if (patient === null) {
         const contentElement = document.getElementById("content");
@@ -72,7 +171,6 @@ async function onPopupLoaded() {
     showPatientInfo(patient)
 
     const cases = await getCases(1);
-    console.log(cases);
 
     if (cases === null) {
         listElement.innerHTML = `<div id="error">Not found</div>`;
@@ -92,7 +190,7 @@ async function onPopupLoaded() {
         }
 
         var rect = moreButton.getBoundingClientRect();
-        
+
         const windowHeight = (window.innerHeight || document.documentElement.clientHeight);
 
         const vertInView = (rect.top <= windowHeight) && ((rect.top + rect.height) >= 0);
@@ -124,10 +222,8 @@ function showPatientInfo(patient) {
 }
 
 async function createCaseItems(cases, addMoreListElements) {
-    const includedMap = createIncludedMap(cases);
-
     const caseElements = cases.data.map((patientCase) => {
-        const doctor = includedMap.professionals[patientCase.relationships.doctor.data.id]['attributes'];
+        const doctor = patientCase.relationships.doctor.data.attributes;
 
         const caseElement = document.createElement("li");
 
@@ -141,9 +237,8 @@ async function createCaseItems(cases, addMoreListElements) {
         const episodesElement = document.createElement("ul");
         detailsElement.append(episodesElement)
 
-        episodesElement.append(...patientCase.relationships.episodes.data.map((episodeData) => {
-            const episode = includedMap.episodes[episodeData.id];
-            const doctor = includedMap.professionals[episode.relationships.doctor.data.id]['attributes'];
+        episodesElement.append(...patientCase.relationships.episodes.data.map((episode) => {
+            const doctor = episode.relationships.doctor.data.attributes;
 
             const el = document.createElement("li");
             el.innerHTML = `<span>episode</span><span>${episode.attributes.created_at}</span><span>${doctor.fullname}</span>`;
@@ -156,12 +251,13 @@ async function createCaseItems(cases, addMoreListElements) {
                 selectedListElem.classList.add("selected");
 
                 const detailElement = document.getElementById("detail");
-    
+
                 detailElement.innerHTML = "Loading..."
-    
+
                 const episodeDetail = await getEpisodeDetail(episode.id);
+
                 const episodeDetailElement = await createEpisodeDetailElement(episodeDetail);
-    
+
                 detailElement.innerHTML = "";
                 detailElement.appendChild(episodeDetailElement);
             }
@@ -177,7 +273,7 @@ async function createCaseItems(cases, addMoreListElements) {
         moreButton.innerHTML = "Load more";
         moreButton.onclick = async () => {
             moreButton.innerHTML = "Loading...";
-            moreButton.onclick = () => {};
+            moreButton.onclick = () => { };
             const moreCases = await getCases(cases.meta.current_page + 1);
             moreButton.remove();
             if (moreCases === null) {
@@ -206,15 +302,13 @@ async function createCasesElement(cases) {
     return casesElement
 }
 
-async function createEpisodeDetailElement(episodeDetail) {
-    const includedMap = createIncludedMap(episodeDetail);
-
-    const doctor = includedMap.professionals[episodeDetail.data.relationships.doctor.data.id]['attributes'];
+async function createEpisodeDetailElement(episode) {
+    const doctor = episode.data.relationships.doctor.data.attributes;
 
     const detailElement = document.createElement("div");
 
-    const episodeId = episodeDetail.data.id;
-    const patientId = episodeDetail.data.relationships.patient.data.id;
+    const episodeId = episode.data.id;
+    const patientId = episode.data.relationships.patient.data.id;
 
     const episodeHeading = document.createElement("h2");
     episodeHeading.innerHTML = `<span>Episode</span>` +
@@ -222,61 +316,87 @@ async function createEpisodeDetailElement(episodeDetail) {
 
     const episodeInfo = document.createElement("ul");
     episodeInfo.className = 'episode-info';
-    episodeInfo.innerHTML = `<li><span>created at</span><span>${episodeDetail.data.attributes.created_at}</span></li>` +
-        `<li><span>visited on</span><span>${episodeDetail.data.attributes.visited_on}</span></li>` +
+    episodeInfo.innerHTML = `<li><span>created at</span><span>${episode.data.attributes.created_at}</span></li>` +
+        `<li><span>visited on</span><span>${episode.data.attributes.visited_on}</span></li>` +
         `<li><span>doctor</span><span>${doctor.fullname}</span></li>`
+
+    detailElement.append(
+        episodeHeading,
+        episodeInfo,
+        ...createDiagnosisList(episode),
+        ...createNoteList(episode),
+        ...createPrescriptionList(episode)
+    )
+
+    return detailElement;
+}
+
+
+function createNoteList(episode) {
+    if (episode.data.relationships.notes.data.length < 1) {
+        return []
+    }
 
     const noteHeading = document.createElement("h2");
     noteHeading.innerHTML = "Notes";
 
     const noteList = document.createElement("ul");
     noteList.className = "notes-list";
-    noteList.append(...episodeDetail.data.relationships.notes.data.map((noteData) => {
-        note = includedMap[noteData.type][noteData.id]['attributes'];
-
+    noteList.append(...episode.data.relationships.notes.data.map((note) => {
         const el = document.createElement("li");
-        el.classList = ['note', note.note_type]
-        el.innerHTML = `<span>${note.note_type}</span><span>${note.notes}</span>`
+        el.classList = ['note', note.attributes.note_type]
+        el.innerHTML = `<span>${note.attributes.note_type}</span><span>${note.attributes.notes}</span>`
         return el
     }))
+
+    return [noteHeading, noteList];
+}
+
+
+function createDiagnosisList(episode) {
+    if (episode.data.relationships.diagnoses.data.length < 1) {
+        return []
+    }
 
     const diagnosisHeading = document.createElement("h2");
     diagnosisHeading.innerHTML = "Diagnosis";
 
+
     const diagnosisList = document.createElement("ul");
     diagnosisList.className = 'diagnosis-list';
-    diagnosisList.append(...episodeDetail.data.relationships.diagnoses.data.map((diagData) => {
-        const diagnosis = includedMap['diagnoses'][diagData.id]['attributes'];
-
+    diagnosisList.append(...episode.data.relationships.diagnoses.data.map((diagnosis) => {
         const el = document.createElement("li");
-        el.innerHTML = `<span>${diagnosis['icd-code']['code']}</span>` +
-            `<span>${diagnosis['icd-code']['title']}</span>` +
-            `<span>${(diagnosis['remarks'] === null) ? "" : diagnosis['remarks']}</span>`;
+        el.innerHTML = `<span>${diagnosis.attributes['icd-code'].code}</span>` +
+            `<span>${diagnosis.attributes['icd-code'].title}</span>` +
+            `<span>${(diagnosis.attributes.remarks === null) ? "" : diagnosis.attributes.remarks}</span>`;
 
         return el;
     }));
+
+    return [diagnosisHeading, diagnosisList];
+}
+
+
+function createPrescriptionList(episode) {
+    if (episode.data.relationships.prescriptions.data.length < 1) {
+        return [];
+    }
 
     const presciptionHeading = document.createElement("h2");
     presciptionHeading.innerHTML = "Prescription";
 
     const prescriotionList = document.createElement("ul");
     prescriotionList.className = "prescription-list";
-    prescriotionList.append(...episodeDetail.data.relationships.prescriptions.data.map((prescriptionData) => {
-        const prescriptionItem = includedMap['prescriptions'][prescriptionData.id];
-
+    prescriotionList.append(...episode.data.relationships.prescriptions.data.map((prescriptionItem) => {
         const prescElement = document.createElement("li");
         prescElement.innerHTML = `<div><span>created at</span> <span>${prescriptionItem.attributes.created_at}</span></div>`;
 
-        console.log(prescriptionItem);
-        console.log(includedMap);
         const medicineList = document.createElement("ol");
-        medicineList.append(...prescriptionItem.relationships.medicines.data.map((medicineData) => {
-            const prescription_medicine = includedMap['prescription-medicines'][medicineData.id];
-
+        medicineList.append(...prescriptionItem.relationships.medicines.data.map((prescription_medicine) => {
             const el = document.createElement("li");
 
-            if (prescription_medicine.relationships['preferred-medicine'].data !== null) {
-                const preferred_medicine = includedMap['medicines'][prescription_medicine.relationships['preferred-medicine'].data.id];
+            if (prescription_medicine.relationships['preferred-medicine'] !== null) {
+                const preferred_medicine = prescription_medicine.relationships['preferred-medicine'].data;
                 el.innerHTML = `<span>${preferred_medicine.attributes.preparation}</span> ` +
                     `<span class="medicine-name">${preferred_medicine.attributes.name}</span> ` +
                     `<span>${preferred_medicine.attributes.strength}</span> ` +
@@ -299,30 +419,5 @@ async function createEpisodeDetailElement(episodeDetail) {
         return prescElement;
     }));
 
-    detailElement.append(
-        episodeHeading,
-        episodeInfo,
-        diagnosisHeading,
-        diagnosisList,
-        noteHeading,
-        noteList,
-        presciptionHeading,
-        prescriotionList
-    )
-
-    return detailElement;
-}
-
-
-function createIncludedMap(item) {
-    var map = {};
-
-    item.included.forEach((itemIncluded) => {
-        if (!(itemIncluded.type in map)) {
-            map[itemIncluded.type] = {}
-        }
-        map[itemIncluded.type][itemIncluded.id] = itemIncluded;
-    })
-
-    return map;
+    return [presciptionHeading, prescriotionList];
 }
