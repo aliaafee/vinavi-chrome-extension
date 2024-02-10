@@ -263,3 +263,23 @@ ul.prescription-list > li > ol {
 ul.prescription-list > li > ol > li > span.medicine-name {
     font-weight: bold;
 }
+
+a.view-source {
+    cursor: pointer;
+    text-decoration: none;
+    opacity: 0.5;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+a.view-source > span:nth-child(2) {
+    display: none;
+}
+
+a.view-source:hover > span:nth-child(1) {
+    display: none;
+}
+
+a.view-source:hover > span:nth-child(2) {
+    display: inline;
+}

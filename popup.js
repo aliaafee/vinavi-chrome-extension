@@ -303,9 +303,18 @@ async function createCasesElement(cases) {
 }
 
 async function createEpisodeDetailElement(episode) {
-    const doctor = episode.data.relationships.doctor.data.attributes;
-
     const detailElement = document.createElement("div");
+
+    const sourceElement = document.createElement("a");
+    sourceElement.className = "view-source"
+    sourceElement.innerHTML = "<span>-</span><span>inspect episode</span>";
+    sourceElement.onclick = () => {
+        console.log(episode);
+    }
+
+    detailElement.append(sourceElement);
+
+    const doctor = episode.data.relationships.doctor.data.attributes;
 
     const episodeId = episode.data.id;
     const patientId = episode.data.relationships.patient.data.id;
@@ -320,7 +329,7 @@ async function createEpisodeDetailElement(episode) {
         `<li><span>visited on</span><span>${episode.data.attributes.visited_on}</span></li>` +
         `<li><span>doctor</span><span>${doctor.fullname}</span></li>`
 
-    detailElement.append(
+    detailElement.prepend(
         episodeHeading,
         episodeInfo,
         ...createDiagnosisList(episode),
