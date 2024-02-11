@@ -1,3 +1,4 @@
+const loadingHtml = `<span class="spinner"><span></span></span>`;
 var selectedListElem = null;
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -180,8 +181,14 @@ async function getAllCases(page = 1) {
 }
 
 async function onPopupLoaded() {
+    const contentElement = document.getElementById("content");
+    const loadingElement = document.getElementById("loading");
+
+    contentElement.style.display = "none";
+    loadingElement.style.display = "";
+
     const listElement = document.getElementById("list");
-    listElement.innerHTML = `<div id="loading">Loading...</div>`;
+    listElement.innerHTML = `<div id="loading">${loadingHtml}</div>`;
 
     const patient = await getPatient();
 
@@ -232,6 +239,9 @@ async function onPopupLoaded() {
         listElement.innerHTML = "";
         listElement.appendChild(casesElement);
     }
+
+    contentElement.style.display = "";
+    loadingElement.style.display = "none";
 }
 
 function filterCases(filterString, cases) {
@@ -307,7 +317,7 @@ async function createCaseItems(cases, addMoreListElements) {
 
                 const detailElement = document.getElementById("detail");
 
-                detailElement.innerHTML = "Loading..."
+                detailElement.innerHTML = `<div id="loading">${loadingHtml}</div>`;
 
                 const episodeDetail = await getEpisodeDetail(episode.id);
 
@@ -327,7 +337,7 @@ async function createCaseItems(cases, addMoreListElements) {
         moreButton.className = "load-more"
         moreButton.innerHTML = "Load more";
         moreButton.onclick = async () => {
-            moreButton.innerHTML = "Loading...";
+            moreButton.innerHTML = `${loadingHtml}`;
             moreButton.onclick = () => { };
             const moreCases = await getCases(cases.meta.current_page + 1);
             moreButton.remove();

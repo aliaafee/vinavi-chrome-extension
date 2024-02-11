@@ -17,6 +17,57 @@ body {
     height: 100%;
 }
 
+#loading {
+    display: block;
+    height: 100%;
+}
+
+#loading > .spinner {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 26px;
+}
+
+#loading > .spinner span {
+    width: 25px;
+    height: 25px;
+    border-width: 3px;
+}
+
+.spinner {
+    display: inline-block;
+    position: relative;
+    width: 16px;
+    height: 16px;
+    align-self: flex-start;
+}
+
+.spinner span {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    margin: 2px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    /* animation: spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; */
+    animation: spinner 1.2s linear infinite;
+    border-color: #000 black transparent transparent;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 #patient-info {
     grid-column: 1/3;
     display: grid;
@@ -26,9 +77,7 @@ body {
     background-color: lightgray;
 }
 
-#patient-info>div {
-    
-}
+#patient-info>div {}
 
 #patient-info>div:nth-child(1) {
     grid-column: 1/3;
@@ -118,6 +167,10 @@ body {
     cursor: pointer;
 }
 
+#list>ul>li.load-more {
+    text-align: center;
+}
+
 #list>ul>li.failed-load {
     color: red;
 }
@@ -155,14 +208,14 @@ body {
     padding: 5px;
 }
 
-#detail > div > h2 {
+#detail>div>h2 {
     margin: 10px 0 5px 0;
     font-size: medium;
     vertical-align: bottom;
     display: flex;
 }
 
-#detail > div > h2 > a {
+#detail>div>h2>a {
     display: inline-block;
     width: 21px;
     height: 21px;
@@ -172,11 +225,11 @@ body {
     border-radius: 50%;
 }
 
-#detail > div > h2 > a:visited {
+#detail>div>h2>a:visited {
     background-color: #800080;
 }
 
-#detail > div > h2 > a:active {
+#detail>div>h2>a:active {
     background-color: #FF0000;
 }
 
@@ -197,16 +250,16 @@ ul.episode-info li:nth-child(3) {
     grid-column: 1/3;
 }
 
-ul.episode-info li > span {
+ul.episode-info li>span {
     display: block
 }
 
-ul.episode-info li > span:first-child {
+ul.episode-info li>span:first-child {
     font-size: smaller;
     font-variant: small-caps;
 }
 
-ul.episode-info li > span:nth-child(2) {
+ul.episode-info li>span:nth-child(2) {
     font-weight: bold;
 }
 
@@ -218,22 +271,22 @@ ul.notes-list {
     grid-gap: 10px;
 }
 
-ul.notes-list > li {
+ul.notes-list>li {
     background-color: lightgray;
     border-radius: 5px;
     padding: 5px;
 }
 
-ul.notes-list > li > span {
+ul.notes-list>li>span {
     display: block;
 }
 
-ul.notes-list > li > span:first-child {
+ul.notes-list>li>span:first-child {
     font-size: smaller;
     font-variant: small-caps;
 }
 
-ul.notes-list > li > span:nth-child(2) {
+ul.notes-list>li>span:nth-child(2) {
     white-space: pre-wrao;
 }
 
@@ -242,21 +295,20 @@ ul.diagnosis-list {
     padding: 0px;
 }
 
-ul.diagnosis-list > li {
+ul.diagnosis-list>li {
     display: grid;
     grid-template-columns: 50px calc(100% - 50px);
     grid-gap: 0px;
     margin-bottom: 5px;
 }
 
-ul.diagnosis-list > li > span {
-}
+ul.diagnosis-list>li>span {}
 
-ul.diagnosis-list > li > span:nth-child(1) {
+ul.diagnosis-list>li>span:nth-child(1) {
     font-weight: bold;
 }
 
-ul.diagnosis-list > li > span:nth-child(3) {
+ul.diagnosis-list>li>span:nth-child(3) {
     grid-column: 2/3;
     font-style: italic;
 }
@@ -269,26 +321,26 @@ ul.prescription-list {
     grid-gap: 10px;
 }
 
-ul.prescription-list > li {
+ul.prescription-list>li {
     background-color: lightgray;
     border-radius: 5px;
     padding: 5px;
 }
 
-ul.prescription-list > li > div > span:nth-child(1) {
+ul.prescription-list>li>div>span:nth-child(1) {
     font-size: smaller;
     font-variant: small-caps;
 }
 
-ul.prescription-list > li > div > span:nth-child(2) {
+ul.prescription-list>li>div>span:nth-child(2) {
     font-weight: bold;
 }
 
-ul.prescription-list > li > ol {
+ul.prescription-list>li>ol {
     padding-left: 20px;
 }
 
-ul.prescription-list > li > ol > li > span.medicine-name {
+ul.prescription-list>li>ol>li>span.medicine-name {
     font-weight: bold;
 }
 
@@ -300,14 +352,14 @@ a.view-source {
     display: inline-block;
 }
 
-a.view-source > span:nth-child(2) {
+a.view-source>span:nth-child(2) {
     display: none;
 }
 
-a.view-source:hover > span:nth-child(1) {
+a.view-source:hover>span:nth-child(1) {
     display: none;
 }
 
-a.view-source:hover > span:nth-child(2) {
+a.view-source:hover>span:nth-child(2) {
     display: inline;
 }
