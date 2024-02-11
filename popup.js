@@ -156,6 +156,29 @@ function processResource(resource) {
     }
 }
 
+async function getAllCases(page = 1) {
+    const cases = await getCases(page);
+
+    if (cases.meta.last_page > cases.meta.current_page) {
+        const moreCases = await getAllCases(page + 1);
+        return {
+            data: cases.data.concat(moreCases.data),
+            meta: {
+                current_page: 1,
+                last_page: 1
+            }
+        }
+    }
+
+    return {
+        data: cases.data,
+        meta: {
+            current_page: 1,
+            last_page: 1
+        }
+    }
+}
+
 async function onPopupLoaded() {
     const listElement = document.getElementById("list");
     listElement.innerHTML = `<div id="loading">Loading...</div>`;
@@ -170,6 +193,7 @@ async function onPopupLoaded() {
 
     showPatientInfo(patient)
 
+    // const cases = await getAllCases();
     const cases = await getCases(1);
 
     if (cases === null) {
@@ -200,6 +224,37 @@ async function onPopupLoaded() {
         }
 
     }
+
+    const filterInput = document.getElementById("filter-input");
+    filterInput.onkeyup = async () => {
+        const filteredCases = filterCases(filterInput.value, cases);
+        const casesElement = await createCasesElement(filteredCases);
+        listElement.innerHTML = "";
+        listElement.appendChild(casesElement);
+    }
+}
+
+function filterCases(filterString, cases) {
+    if (filterString === "") {
+        return cases
+    }
+    const filteredData = cases.data.filter((patientCase) => {
+        return patientCase.relationships.episodes.data.reduce((accumulator, episode) => {
+            const name = patientCase.relationships.doctor.data.attributes.fullname;
+            return accumulator
+                || episode.relationships.doctor.data.attributes.fullname.toUpperCase().includes(filterString.toUpperCase())
+                || episode.attributes.created_at.includes(filterString)
+        }, false)
+    });
+
+    return {
+        data: filteredData,
+        meta: {
+            current_page: 1,
+            last_page: 1
+        }
+    }
+
 }
 
 function getAge(dateOfBirth) {
