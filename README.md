@@ -1,4 +1,7 @@
- 
+# DEPRECATED
+This repository is deprecated, see [Vinavi Chrome Extension React](https://github.com/aliaafee/vinavi-chrome-extension-react) for newer version.
+
+
 <p align="center"><img src="images/icon.svg"/></p>
 
 <h2 align="center">Vinavi Chrome Extension</h2>
